@@ -5,30 +5,36 @@
         <div class="col-lg-12">
           <h2>Текущий уровень игры - <span class="text-lvl-game">{{currentLvlGame}}</span></h2>
           <h2>Настройте тренажер под себя</h2>
-          <fieldset>
-            <legend>Настройка</legend>
+          <fieldset class="game_settings">
             <div class="custom-controls-stacked">
               <label class="custom-control custom-radio">
-                <input id="radioStacked3" name="radio-stacked" type="radio" class="custom-control-input" checked>
+                <input id="radioStacked3" name="radio-stacked" type="radio" class="custom-control-input" @change="enableTournMode('default')" checked>
                 <span class="custom-control-indicator"></span>
                 <span class="custom-control-description">Играть на время (можно установить любое)</span>
-              </label>
-              <label class="custom-control custom-radio">
-                <input id="radioStacked4" name="radio-stacked" type="radio" class="custom-control-input" disabled>
-                <span class="custom-control-indicator"></span>
-                <span class="custom-control-description">Турнирный режим (время: 1 минута)</span>
               </label>
               <label class="custom-control custom-checkbox">
                 <input v-model="complicatedMode" type="checkbox" class="custom-control-input" id="complicatedMode">
                 <span class="custom-control-indicator"></span>
                 <span class="custom-control-description">Включить усложненный режим (добавить: *, / )</span>
               </label>
-            </div>
-            <div>
               <label>Выберите количество секунд игры
-                <input class="range-time-game" type="number" value="20" min="5" max="240" step="5">
+                <input class="range-time-game" type="number" value="20" min="5" max="240" step="5" :disabled="$store.state.tournMode === true ? true : false">
               </label>
             </div>
+            <div class="tourn_mode">
+              <label class="custom-control custom-radio">
+                <input id="radioStacked4" name="radio-stacked" value="true" type="radio" class="custom-control-input" @change="enableTournMode('tourn')" :disabled="$store.state.userData.loginSuccess ===  true ? false : true">
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">
+                  Турнирный режим (время: 1 минута)
+                </span>
+                <br>
+                <time>Данный режим доступен только вошедшим пользователям</time>
+              </label>
+            </div>
+
+
+
           </fieldset>
           <div class="control-btn-field">
             <button v-if="testingComplete" type="button" id="btn-start" class="btn btn-info btn-block" @click="startGame">Start</button>
@@ -67,7 +73,7 @@
           </div>
         </div>
         <div class="col-lg-12 game-field">
-          <input v-model="dataCurrentTesting.userAnswer" class="field-answer" type="text" placeholder="Здесь будет отображаться ваш вводимый ответ" @input="processedInput">
+          <input v-model="dataCurrentTesting.userAnswer" class="field-answer" type="text" placeholder="Здесь будет отображаться ваш вводимый ответ" @input="processedAnswer">
           <div class="number-field">
             <button type="button" class="btn btn-outline-info" @click="addNumber($event.target.value)" value="1">1</button>
             <button type="button" class="btn btn-outline-info" @click="addNumber($event.target.value)" value="2">2</button>
@@ -80,6 +86,7 @@
             <button type="button" class="btn btn-outline-info" @click="addNumber($event.target.value)" value="9">9</button>
             <button type="button" class="btn btn-outline-info" @click="addNumber($event.target.value)" value="0">0</button>
             <button type="button" class="btn btn-outline-info" @click="addNumber($event.target.value)" value="-">-</button>
+            <button type="button" class="btn btn-outline-info" @click="addNumber($event.target.value)" value=".">.</button>
             <button type="button" class="btn btn-large btn-danger" @click="sendAnswer">Отправить результат</button>
             <button type="button" class="btn btn-large btn-danger" @click="removeAnswer">Очистить</button>
           </div>
@@ -91,6 +98,7 @@
 
 
 <script>
+  import * as firebase from 'firebase'
 
   export default  {
     name: 'StartGame',
@@ -101,7 +109,10 @@
         countCorrectAnswer: 0,
         currentLvlGame: '',
         timeCycle: '',
+        timeCycle2: '',
         complicatedMode: false,
+
+        tournMode: false,
 
         mathOperation: ['+', '-'],
         objectGameSettings: {},
@@ -114,13 +125,12 @@
     },
     created() {
       this.currentLvlGame = this.$store.state.MainSettings.lvlGame;
-      if (this.$router.currentRoute.name === 'StartGame') {
-        this.$store.state.nameControlButton = 'Вернуться в главное меню'
-      } else if (this.$router.currentRoute.name === 'LvlGame' ) {
-        this.$store.state.nameControlButton = 'Вернуться в главное меню'
-      } else {
+      if (this.$router.currentRoute.name === 'Menu') {
         this.$store.state.nameControlButton = 'Меню'
+      } else {
+        this.$store.state.nameControlButton = 'Вернуться в меню'
       }
+      console.log('NEW BUILD COMPLETE');
     },
     watch: {
       '$store.state.MainSettings.lvlGame': function () {
@@ -136,10 +146,24 @@
       getNumber(range1, range2) {
         let number1 = this.generateExample(range1, range2);
         let number2 = this.generateExample(range1, range2);
-        return [number1, number2];
+        return [number1, number2]
       },
-      processedInput() {
+      processedAnswer() {
         this.dataCurrentTesting.userAnswer = this.dataCurrentTesting.userAnswer.replace(/[^-.0-9]/ig, '');
+        if (parseInt(this.dataCurrentTesting.userAnswer, 10) === this.dataCurrentTesting.correctAnswer) this.sendAnswer();
+      },
+      enableTournMode(value) {
+        if (value === 'default') {
+          document.querySelector('#complicatedMode').disabled = false;
+          this.tournMode = false;
+          this.$store.commit('tournMode', false);
+        } else if (value === 'tourn') {
+          document.querySelector('#complicatedMode').disabled = true;
+          this.tournMode = true;
+          this.complicatedMode = true;
+          this.$store.commit('tournMode', true);
+          this.$store.commit('setLvlGame', 'Гуманитарий');
+        }
       },
       startGame() {
         this.listResultTest = [];
@@ -151,6 +175,11 @@
         let timeForCurrentTesting = parseInt(document.querySelector('.range-time-game').value, 10);
         let totalTestingTime = parseInt(document.querySelector('.range-time-game').value, 10);
 
+        if (this.tournMode){
+          timeForCurrentTesting = 60;
+          totalTestingTime = 60;
+        }
+
         document.querySelector('.field-answer').focus();
         document.querySelector('.range-time-game').disabled = true;
         document.querySelector('#complicatedMode').disabled = true;
@@ -160,10 +189,10 @@
           document.querySelector('#outputTime').innerText = timeForCurrentTesting--;
         }, 0);
         this.timeCycle = setInterval(() => {
-          document.querySelector('#outputTime').innerText = timeForCurrentTesting--;
+          if (document.querySelector('#outputTime')) document.querySelector('#outputTime').innerText = timeForCurrentTesting--;
         }, 1000);
 
-        setTimeout(this.finishGame, totalTestingTime * 1000);
+        this.timeCycle2 = setTimeout(this.finishGame, totalTestingTime * 1000);
       },
       startTesting() {
         let indexMathOperation = this.generateExample(0, 1);
@@ -193,6 +222,7 @@
             while ((number1 / number2).toString().length > 2) {
               [number1, number2] = this.getNumber(this.objectGameSettings.rangeNumber[0], this.objectGameSettings.rangeNumber[1]);
             }
+
             this.dataCurrentTesting.correctAnswer = number1 / number2;
             this.dataCurrentTesting.currentExample = `${number1} / ${number2}`
           }
@@ -211,17 +241,25 @@
       },
       finishGame() {
         clearInterval(this.timeCycle);
+        clearTimeout(this.timeCycle2);
         this.testingComplete = true;
         this.$store.commit('stateStartingGame', false);
+        if (document.querySelector('#complicatedMode')) document.querySelector('#complicatedMode').disabled = false;
+        if (document.querySelector('.range-time-game')) document.querySelector('.range-time-game').disabled = false;
         this.updateUsedFields();
+
+        if (this.$store.state.userData.uidUser && this.tournMode) {
+          firebase.database().ref().child('TotalUsers/' + this.$store.state.userData.uidUser)
+          .update({ resultTesting: this.countCorrectAnswer});
+        }
       },
       updateUsedFields() {
-        document.querySelector('.range-time-game').disabled = false;
-        document.querySelector('#complicatedMode').disabled = false;
-        document.querySelector('#outputTime').innerText = '';
-        document.querySelector('.display-4').innerText = '- Пример -'
+        if (document.querySelector('#outputTime')) document.querySelector('#outputTime').innerText = '';
+        if (document.querySelector('.display-4')) document.querySelector('.display-4').innerText = '- Пример -';
+        this.dataCurrentTesting.userAnswer = '';
       },
       sendAnswer() {
+        if (this.dataCurrentTesting.userAnswer.length === 0) return;
         if (!this.testingComplete) {
           if (parseInt(this.dataCurrentTesting.userAnswer, 10) === this.dataCurrentTesting.correctAnswer) this.countCorrectAnswer++;
           this.listResultTest.push({
@@ -247,8 +285,14 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 
-  fieldset {
-    margin-bottom: 10px;
+  body {
+    font-family: 'Open Sans', sans-serif;
+  }
+
+
+
+  .btn {
+    cursor: pointer;
   }
 
   .count-correct-answer {
@@ -350,5 +394,9 @@
 
   .text-lvl-game {
     color: indianred;
+  }
+
+  .game_settings {
+    margin-bottom: 10px;
   }
 </style>

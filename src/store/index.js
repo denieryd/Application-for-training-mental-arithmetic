@@ -5,11 +5,23 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    nameControlButton: 'Меню',
+    modePage: '',
+    nameControlButton: 'В меню',
+
+    startingGame: false,
+    tournMode: false,
     MainSettings: {
       lvlGame: 'Школьник-пятиклассник'
     },
-    startingGame: false,
+
+    userData: {
+      headerEmail: '',
+      displayName: '',
+      uidUser: false,
+      loginSuccess: false,
+      resultForRaiting: ''
+    },
+
     typeGameSettings: {
       'Школьник-пятиклассник': {
         rangeNumber: [10, 50],
@@ -19,7 +31,7 @@ export default new Vuex.Store({
         rangeNumber: [10, 100],
         rangeNumber1: [1, 30]
       },
-      'Любитель цифр': {
+      'Соц-эконом': {
         rangeNumber: [50, 500],
         rangeNumber1: [1, 80]
       },
@@ -35,10 +47,19 @@ export default new Vuex.Store({
   },
   mutations: {
     setLvlGame(state, value) {
-      state.MainSettings.lvlGame = value
+      state.MainSettings.lvlGame = value;
+    },
+    tournMode(state, value) {
+      state.tournMode = value;
     },
     stateStartingGame(state, value) {
       state.startingGame = value;
+    },
+    setModePage(state, value) {
+      state.modePage = value;
+    },
+    setUserData(state, obj) {
+      state.userData = obj;
     }
   }
 })

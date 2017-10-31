@@ -4,6 +4,11 @@ import Vue from 'vue'
 import App from './App';
 import router from './router';
 import store from './store/';
+import * as firebase from 'firebase';
+
+firebase.initializeApp({
+
+});
 
 Vue.config.productionTip = false;
 

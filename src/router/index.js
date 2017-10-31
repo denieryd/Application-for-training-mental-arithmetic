@@ -3,6 +3,8 @@ import Router from 'vue-router'
 import MainMenu from '@/components/MainMenu'
 import StartGame from '@/components/StartGame'
 import LvlGame from '@/components/MenuSett/LvlGame'
+import Auth from '@/components/Auth'
+import RaitingUsers from '@/components/RaitingUsers'
 
 Vue.use(Router);
 
@@ -23,6 +25,16 @@ export default new Router({
       path: '/LvlGame',
       name: 'LvlGame',
       component: LvlGame
+    },
+    {
+      path: '/Raiting',
+      name: 'RaitingUsers',
+      component: RaitingUsers
+    },
+    {
+      path: '/auth/:modePage',
+      name: 'Auth',
+      component: Auth
     },
     {
       path: '*',

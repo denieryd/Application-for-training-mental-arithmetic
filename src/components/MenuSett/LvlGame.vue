@@ -22,17 +22,20 @@
       return {
         titlePage: 'Выберите уровень сложности игры',
         currentLvl: 'Школьник-пятиклассник',
-        typeLvl: ['Школьник-пятиклассник', 'Гуманитарий', 'Любитель цифр', 'Учишься на физ-мате', 'Ходячий калькулятор']
+        typeLvl: ['Школьник-пятиклассник', 'Гуманитарий', 'Соц-эконом', 'Учишься на физ-мате', 'Ходячий калькулятор']
       }
     },
     created() {
       this.currentLvl = this.$store.state.MainSettings.lvlGame;
-      if (this.$router.currentRoute.name === 'StartGame') {
-        this.$store.state.nameControlButton = 'Вернуться в главное меню'
-      } else if (this.$router.currentRoute.name === 'LvlGame' ) {
-        this.$store.state.nameControlButton = 'Вернуться в главное меню'
-      } else {
+      if (this.$router.currentRoute.name === 'Menu') {
         this.$store.state.nameControlButton = 'Меню'
+      } else {
+        this.$store.state.nameControlButton = 'Вернуться в меню'
+      }
+    },
+    watch: {
+      '$store.state.MainSettings.lvlGame' : function () {
+        this.currentLvl = this.$store.state.MainSettings.lvlGame;
       }
     },
     methods: {
@@ -69,6 +72,10 @@
 
   .menu-item {
     min-width: 300px;
+  }
+
+  .btn-info {
+    cursor: pointer;
   }
 
   .color-lvl-game {
