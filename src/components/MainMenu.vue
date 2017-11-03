@@ -14,7 +14,7 @@
             <router-link :to="{name: 'RaitingUsers'}" tag="button" class="btn btn-danger btn-lg btn-block">Аллея Славы</router-link>
           </div>
           <div class="menu-item">
-            <button type="button" class="btn btn-danger btn-lg btn-block" disabled>Заметка создателя</button>
+            <router-link :to="{name: 'DeveloperNote'}" tag="button" class="btn btn-danger btn-lg btn-block">Заметка создателя</router-link>
           </div>
         </div>
       </div>

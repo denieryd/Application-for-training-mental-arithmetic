@@ -1,11 +1,27 @@
 <template>
   <main @keyup.13="sendAnswer">
+    <div class="animation-banner">
+      <i class="fa fa-bell" aria-hidden="false"></i>
+      <span class="text-animation-banner">
+          {{ textBanner }}
+      </span>
+    </div>
     <div class="container">
       <div class="row">
         <div class="col-lg-12">
           <h2>Текущий уровень игры - <span class="text-lvl-game">{{currentLvlGame}}</span></h2>
           <h2>Настройте тренажер под себя</h2>
-          <fieldset class="game_settings">
+          <section class="game-settings">
+            <div class="tourn-mode">
+              <label class="custom-control custom-radio">
+                <input id="radioStacked4" name="radio-stacked" value="true" type="radio" class="custom-control-input" @change="enableTournMode('tourn')" :disabled="$store.state.userData.loginSuccess ===  true ? false : true">
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">
+                  Турнирный режим (время: 1 минута)
+                </span>
+              </label>
+              <span class="tourn-mode-details">Данный режим доступен только вошедшим пользователям</span>
+            </div>
             <div class="custom-controls-stacked">
               <label class="custom-control custom-radio">
                 <input id="radioStacked3" name="radio-stacked" type="radio" class="custom-control-input" @change="enableTournMode('default')" checked>
@@ -21,23 +37,9 @@
                 <input class="range-time-game" type="number" value="20" min="5" max="240" step="5" :disabled="$store.state.tournMode === true ? true : false">
               </label>
             </div>
-            <div class="tourn_mode">
-              <label class="custom-control custom-radio">
-                <input id="radioStacked4" name="radio-stacked" value="true" type="radio" class="custom-control-input" @change="enableTournMode('tourn')" :disabled="$store.state.userData.loginSuccess ===  true ? false : true">
-                <span class="custom-control-indicator"></span>
-                <span class="custom-control-description">
-                  Турнирный режим (время: 1 минута)
-                </span>
-                <br>
-                <time>Данный режим доступен только вошедшим пользователям</time>
-              </label>
-            </div>
-
-
-
-          </fieldset>
+          </section>
           <div class="control-btn-field">
-            <button v-if="testingComplete" type="button" id="btn-start" class="btn btn-info btn-block" @click="startGame">Start</button>
+            <button v-if="testingComplete" type="button" id="btn-start" class="btn btn-info btn-block" @click="startTesting">Start</button>
             <button v-else type="button" id="btn-end" class="btn btn-info btn-block" @click="finishGame">Прервать</button>
           </div>
           <div class="alert alert-primary" role="alert">
@@ -104,6 +106,8 @@
     name: 'StartGame',
     data () {
       return {
+        textBanner: 'Вы завершили испытание',
+
         testingComplete: true,
         listResultTest: [],
         countCorrectAnswer: 0,
@@ -130,7 +134,7 @@
       } else {
         this.$store.state.nameControlButton = 'Вернуться в меню'
       }
-      console.log('NEW BUILD COMPLETE');
+      window.addEventListener('blur', this.lossFocusDuringGame)
     },
     watch: {
       '$store.state.MainSettings.lvlGame': function () {
@@ -162,10 +166,10 @@
           this.tournMode = true;
           this.complicatedMode = true;
           this.$store.commit('tournMode', true);
-          this.$store.commit('setLvlGame', 'Гуманитарий');
+          this.$store.commit('setLvlGame', 'Турнирный режим (сезон)');
         }
       },
-      startGame() {
+      startTesting() {
         this.listResultTest = [];
         this.countCorrectAnswer = 0;
         this.objectGameSettings = this.$store.state.typeGameSettings[this.currentLvlGame];
@@ -178,12 +182,13 @@
         if (this.tournMode){
           timeForCurrentTesting = 60;
           totalTestingTime = 60;
+          this.textBanner = 'Ваш результат занесен в "Аллею Славы"'
         }
 
         document.querySelector('.field-answer').focus();
         document.querySelector('.range-time-game').disabled = true;
         document.querySelector('#complicatedMode').disabled = true;
-        this.startTesting();
+        this.updateCurrentExample();
 
         setTimeout(() => {
           document.querySelector('#outputTime').innerText = timeForCurrentTesting--;
@@ -194,7 +199,7 @@
 
         this.timeCycle2 = setTimeout(this.finishGame, totalTestingTime * 1000);
       },
-      startTesting() {
+      updateCurrentExample() {
         let indexMathOperation = this.generateExample(0, 1);
         let mathOperation = this.mathOperation[indexMathOperation];
 
@@ -237,7 +242,7 @@
             this.dataCurrentTesting.currentExample = `${number1} - ${number2}`
           }
         }
-        document.querySelector('.display-4').innerText = this.dataCurrentTesting.currentExample;
+        if (document.querySelector('.display-4')) document.querySelector('.display-4').innerText = this.dataCurrentTesting.currentExample;
       },
       finishGame() {
         clearInterval(this.timeCycle);
@@ -247,6 +252,7 @@
         if (document.querySelector('#complicatedMode')) document.querySelector('#complicatedMode').disabled = false;
         if (document.querySelector('.range-time-game')) document.querySelector('.range-time-game').disabled = false;
         this.updateUsedFields();
+        this.animationBannerEndGame();
 
         if (this.$store.state.userData.uidUser && this.tournMode) {
           firebase.database().ref().child('TotalUsers/' + this.$store.state.userData.uidUser)
@@ -267,28 +273,43 @@
             'Correct': this.dataCurrentTesting.correctAnswer,
             'userAnswer': parseInt(this.dataCurrentTesting.userAnswer, 10)
           });
-          this.startTesting();
+          this.updateCurrentExample();
         }
         this.dataCurrentTesting.userAnswer = '';
       },
       addNumber(value) {
         this.dataCurrentTesting.userAnswer += value;
+        this.processedAnswer();
       },
       removeAnswer() {
         this.dataCurrentTesting.userAnswer = '';
+      },
+      lossFocusDuringGame() {
+        if (!this.testingComplete) this.updateCurrentExample();
+      },
+      animationBannerEndGame() {
+        setTimeout(() => {
+          document.querySelector('.animation-banner').classList.add('animation-banner-start')
+        }, 500);
+
+        setTimeout(() => {
+          document.querySelector('.animation-banner').classList.add('animation-banner-end')
+        }, 3000);
+
+        setTimeout(() => {
+          document.querySelector('.animation-banner').classList.remove('animation-banner-start', 'animation-banner-end')
+        }, 7000);
       }
     }
   }
+
+
+
 
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
-  body {
-    font-family: 'Open Sans', sans-serif;
-  }
-
 
 
   .btn {
@@ -305,6 +326,40 @@
 
   .wrong-answer {
     border: 2px solid crimson;
+  }
+
+  main {
+    position: relative;
+  }
+
+  .animation-banner {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100%;
+    height: 4%;
+
+    opacity: 0;
+    color: black;
+    font-size: 23px;
+    z-index: 1;
+    background: rgba(139,197,65, 1);
+  }
+
+  .animation-banner-start {
+    transition: opacity 0.4s, transform ;
+    opacity: 1;
+  }
+
+  .animation-banner-end {
+    transition: opacity 2.5s;
+    opacity: 0;
+  }
+
+  .text-animation-banner {
+    margin-left: 15px;
   }
 
   .row {
@@ -396,7 +451,14 @@
     color: indianred;
   }
 
-  .game_settings {
+  .game-settings {
+    margin-bottom: 10px;
+  }
+
+
+  .tourn-mode-details {
+    display: block;
+    margin-top: -5px;
     margin-bottom: 10px;
   }
 </style>

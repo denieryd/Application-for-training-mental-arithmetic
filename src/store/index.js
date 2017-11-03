@@ -27,7 +27,7 @@ export default new Vuex.Store({
         rangeNumber: [10, 50],
         rangeNumber1: [1, 20]
       },
-      'Гуманитарий': {
+      'Турнирный режим (сезон)': {
         rangeNumber: [10, 100],
         rangeNumber1: [1, 30]
       },

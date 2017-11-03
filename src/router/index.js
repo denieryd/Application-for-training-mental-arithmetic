@@ -5,6 +5,7 @@ import StartGame from '@/components/StartGame'
 import LvlGame from '@/components/MenuSett/LvlGame'
 import Auth from '@/components/Auth'
 import RaitingUsers from '@/components/RaitingUsers'
+import DeveloperNote from '@/components/DeveloperNote'
 
 Vue.use(Router);
 
@@ -30,6 +31,11 @@ export default new Router({
       path: '/Raiting',
       name: 'RaitingUsers',
       component: RaitingUsers
+    },
+    {
+      path: 'Note',
+      name: 'DeveloperNote',
+      component: DeveloperNote
     },
     {
       path: '/auth/:modePage',

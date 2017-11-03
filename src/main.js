@@ -7,7 +7,12 @@ import store from './store/';
 import * as firebase from 'firebase';
 
 firebase.initializeApp({
-
+  apiKey: "AIzaSyCcI4kBCa8LTxpDiS8YeKp12uAcuk9sjZ8",
+  authDomain: "mental-7912c.firebaseapp.com",
+  databaseURL: "https://mental-7912c.firebaseio.com",
+  projectId: "mental-7912c",
+  storageBucket: "",
+  messagingSenderId: "7528187351"
 });
 
 Vue.config.productionTip = false;

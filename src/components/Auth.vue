@@ -2,16 +2,18 @@
   <div class="container">
     <div class="row center">
       <div class="main-authorization">
+
         <h2 class="main-authorization-title text-effect-shadow">{{ $store.state.modePage === 'login' ? 'Sign to Marh' : 'Join to Marh' }}</h2>
+
         <form class="main-authorization-form" @submit.prevent="authorization">
           <label for="email">Email address</label>
-          <input type="email" class="margin-bot-md" id="email" v-model="userData.email" placeholder="Email" autofocus>
+          <input type="email" class="margin-bot-md" id="email" v-model="userData.email" placeholder="Email" required autofocus>
           <div v-if="$store.state.modePage === 'registration'">
             <label for="displayName">Username</label>
             <input type="text" class="margin-bot-md" id="displayName" v-model="userData.displayName" placeholder="Username" required>
           </div>
           <label for="password">Password</label>
-          <input type="password" class="margin-bot-md" id="password" v-model="userData.pass" placeholder="Password">
+          <input type="password" class="margin-bot-md" id="password" v-model="userData.pass" placeholder="Password" required>
           <div v-if="$store.state.modePage === 'login'">
             <label class="custom-control custom-checkbox">
               <input v-model="restoreDataLogin" type="checkbox" class="custom-control-input" checked>
@@ -19,6 +21,7 @@
               <span class="custom-control-description">Запомнить логин и пароль</span>
             </label>
           </div>
+
           <div class="alert alert-danger margin-bot-lg" role="alert" v-if="errorsAuth">
             {{ messageError }}
           </div>
@@ -28,7 +31,6 @@
           <span>{{ $store.state.modePage === 'login' ? 'New to Marh?': 'Registered on Marh?'}}</span>
           <a href="#" @click.prevent="getAnotherPage">{{ $store.state.modePage === 'login' ? 'Create a account': 'Sign in account.' }}</a>
         </div>
-
       </div>
     </div>
   </div>
@@ -51,6 +53,7 @@
         restoreDataLogin: false,
         messageError: '',
         errorsAuth: false,
+        showSpinner: false
       }
     },
     created () {
@@ -93,7 +96,7 @@
             .catch(() => {
               this.errorsAuth = true;
               this.messageError = 'Аккаунт с таким email уже существует';
-            })
+            });
           } else {
             this.messageError = 'Проверьте веденные данные по следующим критерям: Пароль длиннее 5 символов, Email длиннее 4. Введенные пароли должны совпадать';
             this.errorsAuth = true;
@@ -113,7 +116,7 @@
               resultForRaiting: 0
             };
             this.$store.commit('setUserData', userDataObj);
-            this.$router.push({name: 'MainMenu'});
+            this.$router.push({name: 'StartGame'});
             if (this.restoreDataLogin) {
               this.rememberLoginData();
             } else {

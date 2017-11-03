@@ -13,10 +13,13 @@
           <tr v-for="(user, index) in listResultUsers">
             <th scope="row">{{ index + 1 }}</th>
             <td>{{ user.displayName}}</td>
-            <td class="correct_answer"> {{ user.Rate }}</td>
+            <td class="correct-answer"> {{ user.Rate }}</td>
           </tr>
         </tbody>
       </table>
+      <div v-if="showSpinner" class="spinner-wrapper">
+        <img src="../assets/spinner.gif" alt="spinner">
+      </div>
     </div>
   </div>
 </template>
@@ -29,6 +32,7 @@
     data() {
       return {
         listResultUsers: [],
+        showSpinner: true
       }
     },
     created() {
@@ -60,6 +64,7 @@
             }
           }
         }
+        this.showSpinner = false;
       }
     }
   }
@@ -67,7 +72,7 @@
 
 <style scoped>
 
-  .correct_answer {
+  .correct-answer {
     color: green;
     font-weight: 900;
     font-size: 18px;
@@ -94,7 +99,7 @@
     background: beige;
   }
 
-  .raiting_table {
+  .raiting-table {
     margin-top: 30px;
   }
 </style>
