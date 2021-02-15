@@ -26,7 +26,7 @@ export default {
   },
   watch: {
     '$route': function () {
-      if (this.$router.currentRoute.name === 'Menu') {
+      if (this.$router.currentRoute.name === 'MainMenu') {
         this.$store.state.nameControlButton = 'Меню'
       } else {
         this.$store.state.nameControlButton = 'Вернуться в меню'

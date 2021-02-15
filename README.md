@@ -1,11 +1,11 @@
-## Математический тренажер устного счета
+## Mental arithmetic math train app
 ***
-Приложение создано для тренировки скорости вычислений арифметических примеров в уме.
+The app is created for mental math skill training
 ***
-### Функционал:
-- Тренировка вашего мозга
-- Отслеживание своего результата
-- Различные уровни сложности
+### App functionality:
+- Train mental arithmetic skill
+- Track your progress
+- Various difficulty levels
 
 ## Build Setup
 ``` bash
@@ -14,11 +14,16 @@ npm install
 
 # serve with hot reload at localhost:8080
 npm run dev
-
-# build for production with minification
-npm run build
-
-# build for production and view the bundle analyzer report
-npm run build --report
 ```
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+
+App's screenshots below:
+
+![alt text](./images/app_scr1.png)
+
+![alt text](./images/app_scr2.png)
+
+![alt text](./images/app_scr3.png)
+
+![alt text](./images/app_scr4.png)
+
+![alt text](./images/app_scr5.png)
