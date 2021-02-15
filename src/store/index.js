@@ -6,7 +6,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     modePage: '',
-    nameControlButton: 'В меню',
+    nameControlButton: 'Меню',
 
     startingGame: false,
     tournMode: false,

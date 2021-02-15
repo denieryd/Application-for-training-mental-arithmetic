@@ -5,7 +5,7 @@
         <thead>
         <tr>
           <th scope="col">#</th>
-          <th scope="col">Username</th>
+          <th scope="col">Пользователь</th>
           <th scope="col">Лучший результат по количеству верных ответов</th>
         </tr>
         </thead>
@@ -36,18 +36,20 @@
       }
     },
     created() {
-      this.getRaitingUsers();
-      if (this.$router.currentRoute.name === 'Menu') {
+      this.getRatingUsers();
+      if (this.$router.currentRoute.name === 'MainMenu') {
         this.$store.state.nameControlButton = 'Меню'
       } else {
         this.$store.state.nameControlButton = 'Вернуться в меню'
       }
     },
     methods: {
-      getRaitingUsers() {
+      getRatingUsers() {
         firebase.database().ref('/TotalUsers').once('value').then((snapshot) => {
           this.getResultUser(snapshot.val());
-        })
+        }).catch((e) => {
+               console.log('error', e)
+              });
       },
       getResultUser(objectResultUser) {
         let _this = this;
